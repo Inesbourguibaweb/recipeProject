@@ -9,6 +9,7 @@ import {
 import { Recipe } from './recipe.model';
 import { Observable } from 'rxjs';
 
+/**This is a decorator */
 @Injectable({ providedIn: 'root' })
 export class RecipeResolverService implements Resolve<Recipe[]> {
   constructor(
