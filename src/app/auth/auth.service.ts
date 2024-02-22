@@ -4,20 +4,13 @@ import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 /** define the interface to konw what kind of response we get from the post function */
-interface AuthResponseData {
+export interface AuthResponseData {
   idToken: string;
   email: string;
   refreshToken: string;
   expiresIn: string;
   localId: string;
-}
-interface LoginResponseData {
-  idToken: string;
-  email: string;
-  refreshToken: string;
-  expiresIn: string;
-  localId: string;
-  registered: boolean;
+  registered?: boolean /** this key is returned only in login method */;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -51,7 +44,7 @@ export class AuthService {
 
   signIn(email: string, password: string) {
     return this.http
-      .post<LoginResponseData>(
+      .post<AuthResponseData>(
         'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBrRgLi8hzeK-18oBJdaPhh47d4Rbi86EI',
         {
           email: email,
@@ -66,7 +59,7 @@ export class AuthService {
             throwError(errorMessage);
           }
           switch (errorResp.error.error.message) {
-            case 'EMAIL_EXISTS':
+            case 'OPERATION_NOT_ALLOWED':
               errorMessage = 'Email already exists';
           }
           return throwError(errorMessage);
