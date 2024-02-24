@@ -37,15 +37,20 @@ export class AuthComponent implements OnInit {
     const email = this.loginForm.value.email;
     const password = this.loginForm.value.password;
 
+    /** An observer to subcribe to when signing up and logging in */
     let authObs: Observable<AuthResponseData>;
 
     this.isLoading = true;
     if (this.isLogginMode) {
       this.isLoading = false;
+      /**the obs takes a new val at each log in */
       authObs = this.authService.signIn(email, password);
     } else {
+      /**the obs takes a new val at each sign up */
+
       authObs = this.authService.signUp(email, password);
     }
+    /** The subscribtion */
     authObs.subscribe(
       (resData) => {
         console.log('resData', resData);
