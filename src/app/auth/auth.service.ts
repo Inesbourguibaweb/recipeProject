@@ -1,8 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Subject, throwError } from 'rxjs';
+import { BehaviorSubject, Subject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { User } from './user.model';
+import { Router } from '@angular/router';
 
 /** define the interface to konw what kind of response we get from the post function */
 export interface AuthResponseData {
@@ -16,7 +17,7 @@ export interface AuthResponseData {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   /**A Subject is a special type of Observable that allows values to be multicasted to many Observers.
    * Subjects are like EventEmitters.
@@ -24,8 +25,10 @@ export class AuthService {
    * You can subscribe to a Subject, and you can call next to feed values as well as error and complete.
    *  */
 
-  user = new Subject<User>();
+  // user = new Subject<User>();
+  user = new BehaviorSubject<User>(null);
 
+  /**Sign up */
   signUp(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
@@ -50,6 +53,7 @@ export class AuthService {
       );
   }
 
+  /**Sign In */
   signIn(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
@@ -74,6 +78,12 @@ export class AuthService {
       );
   }
 
+  /**Logout function */
+  logout() {
+    this.user.next(null);
+    this.router.navigate(['/auth']);
+  }
+
   /**Handle authentication */
 
   private handleAuthentication(
@@ -85,6 +95,7 @@ export class AuthService {
     const expireDate = new Date(new Date().getTime() + expireToken * 1000);
     const user = new User(email, userId, token, expireDate);
     this.user.next(user);
+    localStorage.setItem('userData', JSON.stringify(user));
   }
 
   /**Handling error for sign in and sign up */
