@@ -17,6 +17,7 @@ export interface AuthResponseData {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  expirationTimer: any;
   constructor(private http: HttpClient, private router: Router) {}
 
   /**A Subject is a special type of Observable that allows values to be multicasted to many Observers.
@@ -78,10 +79,54 @@ export class AuthService {
       );
   }
 
+  /** Auto logging: when we refresh the page we extract the usedData*/
+
+  autoLogging() {
+    const userData: {
+      email: string;
+      id: string;
+      _token: string;
+      _expirationToken: Date;
+    } = JSON.parse(localStorage.getItem('userData'));
+
+    if (!userData) {
+      return;
+    }
+
+    const loadedUser = new User(
+      userData.email,
+      userData.id,
+      userData._token,
+      new Date(userData._expirationToken)
+    );
+
+    if (loadedUser.getToken) {
+      this.user.next(loadedUser);
+      const expirationDuration =
+        new Date(userData._expirationToken).getTime() - new Date().getTime();
+
+      console.log('expirationDuration', expirationDuration);
+      this.autoLogout(expirationDuration);
+    }
+  }
+
   /**Logout function */
   logout() {
     this.user.next(null);
     this.router.navigate(['/auth']);
+    localStorage.removeItem('userData');
+    if (this.expirationTimer) {
+      clearTimeout(this.expirationTimer);
+    }
+    this.expirationTimer = null;
+  }
+
+  /**Auto log out after expiration of the token */
+
+  autoLogout(expirationDuration: number) {
+    this.expirationTimer = setTimeout(() => {
+      this.logout();
+    }, expirationDuration);
   }
 
   /**Handle authentication */
@@ -96,6 +141,7 @@ export class AuthService {
     const user = new User(email, userId, token, expireDate);
     this.user.next(user);
     localStorage.setItem('userData', JSON.stringify(user));
+    this.autoLogout(expireToken * 1000);
   }
 
   /**Handling error for sign in and sign up */
