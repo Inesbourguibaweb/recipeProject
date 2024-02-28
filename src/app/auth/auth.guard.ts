@@ -8,7 +8,7 @@ import {
 import { Observable } from 'rxjs';
 
 import { AuthService } from './auth.service';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
@@ -20,6 +20,7 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): boolean | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
     return this.authService.user.pipe(
+      take(1) /** take the latest user value and unsubscribe  */,
       map((user) => {
         const isAuth = !!user;
         if (isAuth) {
