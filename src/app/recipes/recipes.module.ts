@@ -10,7 +10,11 @@ import { RecipeStartComponent } from './recipe-start/recipe-start.component';
 import { RecipeEditComponent } from './recipe-edit/recipe-edit.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RecipeRoutingModel } from './recipe-routing.model';
+import { SharedModule } from '../shared/shared.module';
 
+/**
+ * Add recipe module in order to slit app module and improve the angular app
+ */
 @NgModule({
   declarations: [
     RecipesComponent,
@@ -21,7 +25,7 @@ import { RecipeRoutingModel } from './recipe-routing.model';
     RecipeEditComponent,
   ],
   imports: [
-    CommonModule,
+    SharedModule,
     RouterModule,
     ReactiveFormsModule,
     RecipeRoutingModel,
